@@ -485,7 +485,7 @@ ramdisk-nodeps: $(MKBOOTFS) | $(MINIGZIP)
 	@echo "make $@: ignoring dependencies"
 	$(hide) $(MKBOOTFS) -d $(TARGET_OUT) $(TARGET_ROOT_OUT) | $(MINIGZIP) > $(INSTALLED_RAMDISK_TARGET)
 
-ifneq ($(strip $(TARGET_NO_KERNEL)),true)
+ifneq ($(strip $(TARGET_NO_KERNEL)),fales)
 
 # -----------------------------------------------------------------
 # the boot image, which is a collection of other images.
@@ -507,6 +507,10 @@ endif
 BOARD_KERNEL_PAGESIZE := $(strip $(BOARD_KERNEL_PAGESIZE))
 ifdef BOARD_KERNEL_PAGESIZE
   INTERNAL_BOOTIMAGE_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
+endif
+
+ifeq ($(strip $(BOARD_KERNEL_SEPARATED_DT)),true)
+  INTERNAL_BOOTIMAGE_ARGS += --dt $(INSTALLED_DTIMAGE_TARGET)
 endif
 
 ifeq ($(PRODUCTS.$(INTERNAL_PRODUCT).PRODUCT_SUPPORTS_VERITY),true)
@@ -938,7 +942,9 @@ BOARD_KERNEL_PAGESIZE := $(strip $(BOARD_KERNEL_PAGESIZE))
 ifdef BOARD_KERNEL_PAGESIZE
   INTERNAL_RECOVERYIMAGE_ARGS += --pagesize $(BOARD_KERNEL_PAGESIZE)
 endif
-
+ifeq ($(strip $(BOARD_KERNEL_SEPARATED_DT)),true)
+  INTERNAL_RECOVERYIMAGE_ARGS += --dt $(INSTALLED_DTIMAGE_TARGET)
+endif
 # Keys authorized to sign OTA packages this build will accept.  The
 # build always uses dev-keys for this; release packaging tools will
 # substitute other keys for this one.
